@@ -24,13 +24,13 @@ class MQTT:
 
         self.db = db
         self.DB_TABLE = 'air_quality'
-        self.DB_COLUMNS = ('timestamp', 'temperature', 'humidity', 'mq2', 'mq136', 'category')
+        self.DB_COLUMNS = ('timestamp', 'temperature', 'humidity', 'mq2', 'mq135', 'category')
         
         self.model = model
         self.AIR_QUALITY = ['BAIK', 'SEDANG', 'TIDAK SEHAT']
     
     def __on_connect(self, client, userdata, flags, reason_code, properties):
-        print(f"Connected with result code {reason_code}")
+        print(f"Connected to MQTT broker with result code: {reason_code}")
         client.subscribe(self.topic)
 
     def __on_message(self, client, userdata, msg):
@@ -42,20 +42,20 @@ class MQTT:
         temperature = float(payload['temperature'])
         humidity = float(payload['humidity'])
         mq2 = int(payload['mq2'])
-        mq136 = int(payload['mq136'])
+        mq135 = int(payload['mq135'])
 
         # Change seconds to local datetime
         timestamp = datetime.fromtimestamp(time, tz=pytz.timezone('Asia/Jakarta'))
         timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
 
         # Perform classification using machine learning
-        feature = pd.DataFrame([{'mq2':mq2, 'mq136':mq136}])
+        feature = pd.DataFrame([{'mq2': mq2, 'mq135': mq135}])
         category = self.AIR_QUALITY[self.model.predict(feature)[0]]
         print(f"[INFO] Successfully classified air quality as: {category}")
 
         # Store the data to database
         insert_query = f"INSERT INTO {self.DB_TABLE} ({', '.join(self.DB_COLUMNS)}) VALUES (%s, %s, %s, %s, %s, %s)"
-        self.db.insert(insert_query, (timestamp, temperature, humidity, mq2, mq136, category))
+        self.db.insert(insert_query, (timestamp, temperature, humidity, mq2, mq135, category))
         print('[INFO] Successfully sent data to the database')
 
 
@@ -79,4 +79,7 @@ if __name__ == '__main__':
     db = Database(host=DB_HOST, user=DB_USER, password=DB_PASS, db=DB_NAME, port=DB_PORT)
     mqtt = MQTT(MQTT_BROKER, MQTT_PORT, MQTT_TOPIC, MQTT_KEEP_ALIVE, db, model)
 
-    mqtt.client.loop_forever()
+    try:
+        mqtt.client.loop_forever()
+    except KeyboardInterrupt:
+        pass

@@ -13,7 +13,7 @@ class Helper:
             'temperature': 'float64',
             'humidity': 'float64',
             'mq2': 'int64',
-            'mq136': 'int64',
+            'mq135': 'int64',
             'category': 'category'
         })
 

@@ -19,7 +19,7 @@ if __name__ == '__main__':
     DB_USER = str(os.getenv('DB_USER'))
     DB_PASS = str(os.getenv('DB_PASS'))
     DB_PORT = int(os.getenv('DB_PORT'))
-    DB_COLUMNS_1 = ('timestamp', 'temperature', 'humidity', 'mq2', 'mq136', 'category')
+    DB_COLUMNS_1 = ('timestamp', 'temperature', 'humidity', 'mq2', 'mq135', 'category')
     DB_COLUMNS_2 = ('id', 'category', 'title', 'short_desc', 'content', 'image_url', 'published_at')
 
     db = Database(host=DB_HOST, user=DB_USER, password=DB_PASS, db=DB_NAME, port=DB_PORT)
@@ -85,9 +85,9 @@ if __name__ == '__main__':
 
     # Pengaturan auto-refresh
     if "sleep_time" not in st.session_state:
-        st.session_state.sleep_time = 2
+        st.session_state.sleep_time = 5
     if "auto_refresh" not in st.session_state:
-        st.session_state.auto_refresh = False
+        st.session_state.auto_refresh = True
 
     with st.sidebar.expander("Konfigurasi Dasbor", expanded=True):
         auto_refresh = st.checkbox('Auto Refresh?', st.session_state.auto_refresh)
@@ -167,14 +167,14 @@ if __name__ == '__main__':
             st.write("### Grafik Kualitas Udara")
             
             st.write("#### MQ2")
-            st.write("Grafik ini menunjukkan perubahan tingkat gas MQ2 (metana, propana, dan LPG) di udara.")
+            st.write("Grafik ini menunjukkan perubahan tingkat gas yang terdeteksi oleh sensor MQ-2 (gas mudah terbakar) di udara.")
             fig_mq2 = px.line(data_filtered, x='timestamp', y='mq2', labels={'value': 'MQ2 (ppm)'}, title='Grafik MQ2')
             st.plotly_chart(fig_mq2)
 
-            st.write("#### MQ136")
-            st.write("Grafik ini menunjukkan perubahan tingkat gas MQ136 (gas amonia) di udara.")
-            fig_mq136 = px.line(data_filtered, x='timestamp', y='mq136', labels={'value': 'MQ136 (ppm)'}, title='Grafik MQ136')
-            st.plotly_chart(fig_mq136)
+            st.write("#### MQ135")
+            st.write("Grafik ini menunjukkan perubahan tingkat gas yang terdeteksi oleh sensor MQ-135 (gas atau asap berbahaya) di udara.")
+            fig_mq135 = px.line(data_filtered, x='timestamp', y='mq135', labels={'value': 'MQ135 (ppm)'}, title='Grafik MQ135')
+            st.plotly_chart(fig_mq135)
             
             st.write("#### Suhu")
             st.write("Grafik ini menunjukkan perubahan suhu udara dalam ruangan.")
